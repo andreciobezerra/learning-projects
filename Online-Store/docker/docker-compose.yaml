@@ -1,0 +1,59 @@
+version: '3'
+
+networks:
+  laranet:
+    driver: bridge
+
+services:
+  laravel:
+    build:
+      context: ./laravel
+      dockerfile: Dockerfile
+    container_name: laravel
+    restart: unless-stopped
+    working_dir: /var/www/
+    env_file: ../.env
+    volumes:
+      - ./:/var/www
+    depends_on:
+      - database
+      - redis
+    networks:
+      - laranet
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    container_name: nginx
+    ports:
+      - "8989:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/:/etc/nginx/conf.d/
+    networks:
+      - laranet
+
+  database:
+    image: mysql:5.7.22
+    container_name: mysql
+    platform: linux/x86_64
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-laravel}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-userpass}
+      MYSQL_USER: ${DB_USERNAME:-username}
+    volumes:
+      - ../dbdata:/var/lib/mysql
+    ports:
+      - "3388:3306"
+    networks:
+      - laranet
+
+  redis:
+    build:
+      context: ./redis
+      dockerfile: Dockerfile
+    container_name: redis
+    networks:
+      - laranet
