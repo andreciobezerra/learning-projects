@@ -11,7 +11,8 @@ services:
       dockerfile: Dockerfile
     container_name: laravel
     restart: unless-stopped
-    working_dir: /var/www/
+    ports:
+      - 8000:8000
     env_file: ../.env
     volumes:
       - ../:/var/www
@@ -21,17 +22,20 @@ services:
     networks:
       - laranet
 
-  nginx:
-    image: nginx:alpine
-    restart: unless-stopped
-    container_name: nginx
-    ports:
-      - "8989:80"
-    volumes:
-      - ./:/var/www
-      - ./docker/nginx/:/etc/nginx/conf.d/
-    networks:
-      - laranet
+  # nginx:
+  #   build:
+  #     context: ./nginx
+  #     dockerfile: Dockerfile
+  #   container_name: nginx
+  #   tty: true
+  #   volumes:
+  #     - ../:/var/www
+  #   depends_on:
+  #     - laravel
+  #   ports:
+  #     - "8080:80"
+  #   networks:
+  #     - laranet
 
   database:
     image: mysql:5.7.22

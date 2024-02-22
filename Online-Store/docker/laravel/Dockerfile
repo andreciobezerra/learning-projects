@@ -41,3 +41,7 @@ RUN pecl install -o -f redis \
     &&  docker-php-ext-enable redis
 
 USER $user
+
+ENTRYPOINT ["php", "artisan", "serve"]
+
+CMD ["--host=0.0.0.0"]
